@@ -13,15 +13,18 @@ const router = new Router();
 //   }
 // }
 
-router.get("/", async (req, res) => {
-  res.send("Hello from images!!");
-  //   try {
-  //     const allImages = await Image.findAll();
-  //     res.send(allImages);
-  //   } catch (e) {
-  //     next(e);
-  //   }
-  // });
+router.get("/", async (req, res, next) => {
+  console.log("Got to images!");
+  //res.send("Hello from images!!");
+  //try {
+  const limit = req.query.limit || 25;
+  const offset = req.query.offset || 0;
+
+  const allImages = await Image.findAll({ limit, offset });
+  res.json({ allImages });
+  // } catch (e) {
+  //  next(e);
+  // }
 });
 
 router.post("/", async (req, res, next) => {
