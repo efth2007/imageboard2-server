@@ -1,5 +1,6 @@
 const { Router } = require("express");
 const User = require("../models").user;
+const bcrypt = require("bcrypt");
 
 //instantiate:
 const router = new Router();
@@ -27,7 +28,16 @@ router.post("/", async (req, res, next) => {
     if (!fullName || !email || !password) {
       res.status(400).send("Must provide all required data!");
     } else {
-      const newUser = await User.create({ fullName, email, password });
+      const hashedPassword = bcrypt.hashSync(password, 10);
+
+      //Depending on the case, it might be preferable to do either
+      // const newUser = await User.create(req.body)
+      //...or
+      const newUser = await User.create({
+        fullName,
+        email,
+        password: hashedPassword,
+      });
       res.json({ newUser });
     }
   } catch (e) {
