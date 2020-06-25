@@ -3,6 +3,7 @@ const Image = require("../models").image;
 
 //instantiate:
 const router = new Router();
+const toData = require("../auth/jwt").toData;
 
 // async function findAllImages() {
 //   try {
@@ -15,16 +16,15 @@ const router = new Router();
 
 router.get("/", async (req, res, next) => {
   console.log("Got to images!");
-  //res.send("Hello from images!!");
-  //try {
-  const limit = req.query.limit || 25;
-  const offset = req.query.offset || 0;
+  try {
+    const limit = req.query.limit || 25;
+    const offset = req.query.offset || 0;
 
-  const allImages = await Image.findAll({ limit, offset });
-  res.json({ allImages });
-  // } catch (e) {
-  //  next(e);
-  // }
+    const allImages = await Image.findAll({ limit, offset });
+    res.json({ allImages });
+  } catch (e) {
+    next(e);
+  }
 });
 
 router.post("/", async (req, res, next) => {
@@ -39,6 +39,25 @@ router.post("/", async (req, res, next) => {
     }
   } catch (e) {
     next(e);
+  }
+});
+
+router.get("/auth/messy", async (req, res, next) => {
+  const auth =
+    req.headers.authorization && req.headers.authorization.split(" ");
+  if (auth && auth[0] === "Bearer" && auth[1]) {
+    try {
+      const data = toData(auth[1]);
+    } catch (e) {
+      res.status(400).send("Invalid JWT token");
+    }
+
+    const allImages = await Image.findAll();
+    res.json({ allImages });
+  } else {
+    res.status(401).send({
+      message: "Please supply some valid credentials",
+    });
   }
 });
 
